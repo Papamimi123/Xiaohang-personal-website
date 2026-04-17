@@ -16,7 +16,7 @@ import { getSocialNavItems } from "@/data/socialLinks";
 import { getSiteCopy } from "@/data/siteCopy";
 import Dock from "@/components/Dock";
 import { Github, Instagram, Linkedin } from "lucide-react";
-import { BrowserRouter, Link, Navigate, Route, Routes, useNavigate } from "react-router-dom";
+import { HashRouter, Link, Navigate, Route, Routes, useNavigate } from "react-router-dom";
 
 const LANGUAGE_STORAGE_KEY = "personalwebsite-language";
 
@@ -671,9 +671,9 @@ function App() {
   }, [language]);
 
   return (
-    <BrowserRouter>
+    <HashRouter>
       <AppRoutes language={language} setLanguage={setLanguage} />
-    </BrowserRouter>
+    </HashRouter>
   );
 }
 
