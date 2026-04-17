@@ -27,23 +27,19 @@ export const siteCopy = {
     chroma: {
       work: {
         title: 'Working Chu',
-        subtitle: 'AI Engineer, Data guy',
-        handle: '@AI-Chu'
+        subtitle: 'AI Engineer, Data guy'
       },
       vibe: {
         title: 'Vibecoder Chu',
-        subtitle: 'Vibecoder',
-        handle: '@Vibinglord0821'
+        subtitle: 'Vibecoder'
       },
       gym: {
         title: 'Gym Chu',
-        subtitle: 'Gym',
-        handle: '@Gym Chu'
+        subtitle: 'Gym'
       },
       chill: {
         title: 'Chilling Chu',
-        subtitle: 'Professional Chill Guy',
-        handle: '@chilling-chu'
+        subtitle: 'Professional Chill Guy'
       }
     },
     work: {
@@ -211,23 +207,19 @@ export const siteCopy = {
     chroma: {
       work: {
         title: '工作中的阿初',
-        subtitle: 'AI 工程师，数据男',
-        handle: '@AI-Chu'
+        subtitle: 'AI 工程师，数据男'
       },
       vibe: {
         title: '写代码的阿初',
-        subtitle: '氛围感程序员',
-        handle: '@Vibinglord0821'
+        subtitle: '氛围感程序员'
       },
       gym: {
         title: '健身阿初',
-        subtitle: '健身',
-        handle: '@Gym Chu'
+        subtitle: '健身'
       },
       chill: {
         title: '放松生活的阿初',
-        subtitle: '专业放松生活哲学家',
-        handle: '@chilling-chu'
+        subtitle: '专业放松生活哲学家'
       }
     },
     work: {

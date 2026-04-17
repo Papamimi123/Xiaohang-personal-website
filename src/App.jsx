@@ -69,6 +69,52 @@ const gymStackImages = [
   { src: gym5, alt: "Gym photo 5" },
 ];
 
+function useCompactViewport() {
+  const [isCompactViewport, setIsCompactViewport] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+      return undefined;
+    }
+
+    const mediaQueries = [
+      window.matchMedia("(max-width: 767px)"),
+      window.matchMedia("(pointer: coarse)")
+    ];
+
+    const syncViewport = () => {
+      setIsCompactViewport(mediaQueries.some((query) => query.matches));
+    };
+
+    syncViewport();
+    mediaQueries.forEach((query) => query.addEventListener?.("change", syncViewport));
+
+    return () => {
+      mediaQueries.forEach((query) => query.removeEventListener?.("change", syncViewport));
+    };
+  }, []);
+
+  return isCompactViewport;
+}
+
+function ResponsiveSplitText({
+  language,
+  staticOnCompact = false,
+  text,
+  tag = "p",
+  className = "",
+  ...splitProps
+}) {
+  const isCompactViewport = useCompactViewport();
+  const Tag = tag;
+
+  if (staticOnCompact && language === "zh" && isCompactViewport) {
+    return <Tag className={className}>{text}</Tag>;
+  }
+
+  return <SplitText text={text} tag={tag} className={className} {...splitProps} />;
+}
+
 function SocialDockIcon({ id }) {
   const iconCls = "h-[22px] w-[22px] text-white";
   switch (id) {
@@ -138,7 +184,7 @@ function WithSocialNav({ children, copy, socialNavItems }) {
   );
 }
 
-function LanguageSelectionPage({ copy, currentLanguage, onSelectLanguage }) {
+function LanguageSelectionPage({ copy, currentLanguage, onSelectLanguage, language }) {
   const navigate = useNavigate();
 
   const selectLanguage = (language) => {
@@ -152,7 +198,9 @@ function LanguageSelectionPage({ copy, currentLanguage, onSelectLanguage }) {
         <LightRays className="h-full w-full" color="rgba(255,255,255,0.18)" />
       </div>
       <section className="relative z-10 mx-auto flex min-h-[calc(100dvh-3rem)] max-w-4xl flex-col items-center justify-center gap-5 text-center md:min-h-[calc(100dvh-4rem)]">
-        <SplitText
+        <ResponsiveSplitText
+          language={language}
+          staticOnCompact
           text={copy.selector.title}
           tag="h1"
           splitType="chars"
@@ -198,7 +246,7 @@ function LanguageSelectionPage({ copy, currentLanguage, onSelectLanguage }) {
   );
 }
 
-function HomePage({ copy }) {
+function HomePage({ copy, language }) {
   return (
     <main className="relative min-h-dvh overflow-hidden px-6 py-6 md:py-8">
       <div className="pointer-events-none absolute inset-0">
@@ -208,7 +256,9 @@ function HomePage({ copy }) {
         />
       </div>
       <section className="relative z-10 mx-auto flex min-h-[calc(100dvh-3rem)] max-w-4xl flex-col items-center justify-center gap-4 text-center md:min-h-[calc(100dvh-4rem)]">
-        <SplitText
+        <ResponsiveSplitText
+          language={language}
+          staticOnCompact
           text={copy.home.name}
           tag="h1"
           splitType="chars"
@@ -220,7 +270,9 @@ function HomePage({ copy }) {
           className="text-6xl font-semibold tracking-tight md:text-8xl"
         />
 
-        <SplitText
+        <ResponsiveSplitText
+          language={language}
+          staticOnCompact
           text={copy.home.adjective}
           tag="h1"
           splitType="chars"
@@ -232,7 +284,9 @@ function HomePage({ copy }) {
           className="text-2xl font-serif italic tracking-wide text-white/70 md:text-3xl"
         />
 
-        <SplitText
+        <ResponsiveSplitText
+          language={language}
+          staticOnCompact
           text={copy.home.tagline}
           tag="h1"
           splitType="chars"
@@ -307,9 +361,6 @@ function WorkingPage({ copy, workItem }) {
           </div>
 
           <div className="flex flex-wrap gap-3 text-sm text-white/60">
-            <span className="rounded-full border border-white/15 px-4 py-2">
-              {workItem.handle}
-            </span>
             {copy.work.roles.map((role) => (
               <span key={role} className="rounded-full border border-white/15 px-4 py-2">
                 {role}
@@ -410,7 +461,6 @@ function VibcodePage({ copy, vibeItem }) {
           </div>
 
           <div className="flex flex-wrap gap-3 text-sm text-white/60">
-            <span className="rounded-full border border-white/15 px-4 py-2">{vibeItem.handle}</span>
             <span className="rounded-full border border-white/15 px-4 py-2">{copy.vibecode.role}</span>
           </div>
         </div>
@@ -644,10 +694,11 @@ function AppRoutes({ language, setLanguage }) {
             copy={copy}
             currentLanguage={language}
             onSelectLanguage={setLanguage}
+            language={language}
           />
         }
       />
-      <Route path="/home" element={<HomePage copy={copy} />} />
+      <Route path="/home" element={<HomePage copy={copy} language={language} />} />
       <Route path="/about" element={<WithSocialNav copy={copy} socialNavItems={socialNavItems}><AboutPage copy={copy} chromaItems={chromaItems} /></WithSocialNav>} />
       <Route path="/working" element={<WithSocialNav copy={copy} socialNavItems={socialNavItems}><WorkingPage copy={copy} workItem={workItem} /></WithSocialNav>} />
       <Route path="/vibecode" element={<WithSocialNav copy={copy} socialNavItems={socialNavItems}><VibcodePage copy={copy} vibeItem={vibeItem} /></WithSocialNav>} />
