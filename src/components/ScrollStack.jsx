@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useCallback } from 'react';
+import { useLayoutEffect, useRef, useCallback, useEffect, useState } from 'react';
 import Lenis from 'lenis';
 
 export const ScrollStackItem = ({ children, itemClassName = '' }) => (
@@ -25,6 +25,7 @@ const ScrollStack = ({
   rotationAmount = 0,
   blurAmount = 0,
   useWindowScroll = false,
+  disableAnimations = false,
   onStackComplete
 }) => {
   const scrollerRef = useRef(null);
@@ -34,6 +35,32 @@ const ScrollStack = ({
   const cardsRef = useRef([]);
   const lastTransformsRef = useRef(new Map());
   const isUpdatingRef = useRef(false);
+  const [prefersStaticLayout, setPrefersStaticLayout] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
+      return undefined;
+    }
+
+    const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const coarsePointerQuery = window.matchMedia('(pointer: coarse)');
+
+    const syncPreference = () => {
+      setPrefersStaticLayout(reducedMotionQuery.matches || coarsePointerQuery.matches);
+    };
+
+    syncPreference();
+
+    reducedMotionQuery.addEventListener?.('change', syncPreference);
+    coarsePointerQuery.addEventListener?.('change', syncPreference);
+
+    return () => {
+      reducedMotionQuery.removeEventListener?.('change', syncPreference);
+      coarsePointerQuery.removeEventListener?.('change', syncPreference);
+    };
+  }, []);
+
+  const shouldDisableAnimations = disableAnimations || prefersStaticLayout;
 
   const calculateProgress = useCallback((scrollTop, start, end) => {
     if (scrollTop < start) return 0;
@@ -46,6 +73,18 @@ const ScrollStack = ({
       return (parseFloat(value) / 100) * containerHeight;
     }
     return parseFloat(value);
+  }, []);
+
+  const getDocumentOffsetTop = useCallback(element => {
+    let offset = 0;
+    let current = element;
+
+    while (current) {
+      offset += current.offsetTop || 0;
+      current = current.offsetParent;
+    }
+
+    return offset;
   }, []);
 
   const getScrollData = useCallback(() => {
@@ -67,15 +106,14 @@ const ScrollStack = ({
 
   const getElementOffset = useCallback(element => {
     if (useWindowScroll) {
-      const rect = element.getBoundingClientRect();
-      return rect.top + window.scrollY;
+      return getDocumentOffsetTop(element);
     } else {
       return element.offsetTop;
     }
-  }, [useWindowScroll]);
+  }, [getDocumentOffsetTop, useWindowScroll]);
 
   const updateCardTransforms = useCallback(() => {
-    if (!cardsRef.current.length || isUpdatingRef.current) return;
+    if (shouldDisableAnimations || !cardsRef.current.length || isUpdatingRef.current) return;
 
     isUpdatingRef.current = true;
 
@@ -179,7 +217,8 @@ const ScrollStack = ({
     calculateProgress,
     parsePercentage,
     getScrollData,
-    getElementOffset
+    getElementOffset,
+    shouldDisableAnimations
   ]);
 
   const handleScroll = useCallback(() => {
@@ -187,6 +226,10 @@ const ScrollStack = ({
   }, [updateCardTransforms]);
 
   const setupLenis = useCallback(() => {
+    if (shouldDisableAnimations) {
+      return undefined;
+    }
+
     if (useWindowScroll) {
       const lenis = new Lenis({
         duration: 1.2,
@@ -239,7 +282,7 @@ const ScrollStack = ({
       lenisRef.current = lenis;
       return lenis;
     }
-  }, [handleScroll, useWindowScroll]);
+  }, [handleScroll, shouldDisableAnimations, useWindowScroll]);
 
   useLayoutEffect(() => {
     const scroller = scrollerRef.current;
@@ -257,18 +300,20 @@ const ScrollStack = ({
         card.style.marginBottom = `${itemDistance}px`;
       }
       card.style.zIndex = String(i + 1);
-      card.style.willChange = 'transform, filter';
+      card.style.willChange = shouldDisableAnimations ? 'auto' : 'transform, filter';
       card.style.transformOrigin = 'top center';
       card.style.backfaceVisibility = 'hidden';
-      card.style.transform = 'translateZ(0)';
-      card.style.webkitTransform = 'translateZ(0)';
-      card.style.perspective = '1000px';
-      card.style.webkitPerspective = '1000px';
+      card.style.transform = shouldDisableAnimations ? 'none' : 'translateZ(0)';
+      card.style.webkitTransform = shouldDisableAnimations ? 'none' : 'translateZ(0)';
+      card.style.perspective = shouldDisableAnimations ? 'none' : '1000px';
+      card.style.webkitPerspective = shouldDisableAnimations ? 'none' : '1000px';
+      card.style.filter = '';
     });
 
-    setupLenis();
-
-    updateCardTransforms();
+    if (!shouldDisableAnimations) {
+      setupLenis();
+      updateCardTransforms();
+    }
 
     return () => {
       if (animationFrameRef.current) {
@@ -293,6 +338,7 @@ const ScrollStack = ({
     rotationAmount,
     blurAmount,
     useWindowScroll,
+    shouldDisableAnimations,
     onStackComplete,
     setupLenis,
     updateCardTransforms
@@ -304,17 +350,17 @@ const ScrollStack = ({
         // Global scroll mode - no overflow constraints
         overscrollBehavior: 'contain',
         WebkitOverflowScrolling: 'touch',
-        WebkitTransform: 'translateZ(0)',
-        transform: 'translateZ(0)'
+        WebkitTransform: shouldDisableAnimations ? 'none' : 'translateZ(0)',
+        transform: shouldDisableAnimations ? 'none' : 'translateZ(0)'
       }
     : {
         // Container scroll mode - original behavior
         overscrollBehavior: 'contain',
         WebkitOverflowScrolling: 'touch',
-        scrollBehavior: 'smooth',
-        WebkitTransform: 'translateZ(0)',
-        transform: 'translateZ(0)',
-        willChange: 'scroll-position'
+        scrollBehavior: shouldDisableAnimations ? 'auto' : 'smooth',
+        WebkitTransform: shouldDisableAnimations ? 'none' : 'translateZ(0)',
+        transform: shouldDisableAnimations ? 'none' : 'translateZ(0)',
+        willChange: shouldDisableAnimations ? 'auto' : 'scroll-position'
       };
 
   const containerClassName = useWindowScroll

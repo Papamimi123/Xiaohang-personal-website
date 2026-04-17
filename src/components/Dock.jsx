@@ -83,6 +83,7 @@ export default function Dock({
   panelHeight = 64,
   dockHeight = 256,
   baseItemSize = 50,
+  ariaLabel = 'Application dock',
   /** 'center' = bottom center, 'end' = bottom-right (use inside a fixed bottom-right wrapper) */
   align = 'center'
 }) {
@@ -119,7 +120,7 @@ export default function Dock({
         className={`${className} absolute bottom-2 flex w-fit items-end gap-3 rounded-2xl border-2 border-white/20 bg-black/40 px-3 pb-2 backdrop-blur-md sm:gap-4 sm:px-4 ${barPosition}`}
         style={{ height: panelHeight }}
         role="toolbar"
-        aria-label="Application dock">
+        aria-label={ariaLabel}>
         {items.map((item, index) => (
           <DockItem
             key={index}

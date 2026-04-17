@@ -15,7 +15,8 @@ const ReflectiveCard = ({
   grayscale = 1,
   glassDistortion = 0,
   className = '',
-  style = {}
+  style = {},
+  content = {}
 }) => {
   const baseFrequency = 0.03 / Math.max(0.1, noiseScale);
   const saturation = 1 - Math.max(0, Math.min(1, grayscale));
@@ -28,6 +29,14 @@ const ReflectiveCard = ({
     '--text-color': color,
     '--saturation': saturation
   };
+
+  const {
+    secureAccess = 'SECURE ACCESS',
+    logoAlt = 'UnitedHealth Group logo',
+    name = 'Xiaohang Chu',
+    role = 'AI Engineer',
+    contactInfo = 'Contact Info'
+  } = content;
 
   return (
     <div
@@ -102,7 +111,7 @@ const ReflectiveCard = ({
           <div
             className="flex items-center gap-2 text-[13px] font-bold tracking-[0.1em] px-4 py-2 bg-black/10 rounded border border-black/15">
             <Lock size={17} className="opacity-80" />
-            <span>SECURE ACCESS</span>
+            <span>{secureAccess}</span>
           </div>
           <Activity className="opacity-80" size={28} />
         </div>
@@ -112,19 +121,19 @@ const ReflectiveCard = ({
           <div className="flex h-32 w-full max-w-[300px] items-center justify-center rounded-2xl border border-black/10 bg-white/95 px-8 py-6 shadow-[0_10px_30px_rgba(0,0,0,0.18)]">
             <img
               src={UNITEDHEALTH_GROUP_LOGO_URL}
-              alt="UnitedHealth Group logo"
+              alt={logoAlt}
               className="max-h-full w-full object-contain"
             />
           </div>
           <div className="text-center">
-            <h2 className="text-4xl font-bold tracking-[0.05em] m-0 mb-3 drop-shadow-md">Xiaohang Chu</h2>
-            <p className="text-base tracking-[0.2em] opacity-65 m-0 uppercase">AI Engineer</p>
+            <h2 className="text-4xl font-bold tracking-[0.05em] m-0 mb-3 drop-shadow-md">{name}</h2>
+            <p className="text-base tracking-[0.2em] opacity-65 m-0 uppercase">{role}</p>
           </div>
         </div>
 
         <div className="flex justify-between items-end border-t border-black/15 pt-7">
           <div className="flex flex-col gap-2">
-            <span className="text-xs tracking-[0.1em] opacity-55">Contact Info</span>
+            <span className="text-xs tracking-[0.1em] opacity-55">{contactInfo}</span>
             <span className="font-mono text-lg tracking-[0.05em]">xiaohang_chu@optum.com</span>
             <span className="font-mono text-lg tracking-[0.05em]">614-806-3257</span>
           </div>
